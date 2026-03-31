@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rocketship Out of Control!</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0a1a;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      font-family: sans-serif;
+    }
+
+    /* Stars */
+    .stars {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+    }
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle var(--d) ease-in-out infinite alternate;
+    }
+    @keyframes twinkle {
+      from { opacity: 0.2; transform: scale(1); }
+      to   { opacity: 1;   transform: scale(1.4); }
+    }
+
+    /* Rocket wrapper — crazy chaotic path */
+    .rocket-wrapper {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      animation:
+        crazyPath 4s ease-in-out infinite alternate,
+        wobble    0.35s linear infinite;
+      transform-origin: center center;
+    }
+
+    @keyframes crazyPath {
+      0%   { transform: translate(-40vw, -30vh) rotate(-20deg); }
+      10%  { transform: translate( 20vw, -40vh) rotate( 60deg); }
+      20%  { transform: translate( 35vw,  10vh) rotate(-80deg); }
+      30%  { transform: translate(-20vw,  35vh) rotate( 30deg); }
+      40%  { transform: translate( 10vw, -20vh) rotate(-120deg); }
+      50%  { transform: translate(-35vw,  15vh) rotate( 90deg); }
+      60%  { transform: translate( 30vw,  30vh) rotate(-50deg); }
+      70%  { transform: translate(-10vw, -35vh) rotate( 150deg); }
+      80%  { transform: translate( 40vw, -10vh) rotate(-30deg); }
+      90%  { transform: translate(-30vw,  40vh) rotate( 200deg); }
+      100% { transform: translate( 15vw,  20vh) rotate(-160deg); }
+    }
+
+    @keyframes wobble {
+      0%   { margin-top:  0px; }
+      25%  { margin-top: -6px; }
+      50%  { margin-top:  0px; }
+      75%  { margin-top:  6px; }
+      100% { margin-top:  0px; }
+    }
+
+    /* SVG rocket */
+    .rocket-svg {
+      width: 100px;
+      height: 180px;
+      filter: drop-shadow(0 0 12px #ff6a00);
+    }
+
+    /* Flame flicker */
+    .flame {
+      animation: flicker 0.12s linear infinite alternate;
+      transform-origin: 50% top;
+    }
+    @keyframes flicker {
+      0%   { transform: scaleX(1)   scaleY(1);   opacity: 1; }
+      33%  { transform: scaleX(1.2) scaleY(0.8); opacity: 0.85; }
+      66%  { transform: scaleX(0.8) scaleY(1.3); opacity: 0.95; }
+      100% { transform: scaleX(1.1) scaleY(0.9); opacity: 1; }
+    }
+
+    /* Smoke trail particles */
+    .smoke-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      pointer-events: none;
+    }
+    .puff {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,160,50,0.7), rgba(200,100,30,0));
+      animation: puffOut var(--pd) ease-out forwards;
+      width: var(--ps);
+      height: var(--ps);
+      top: calc(var(--py) * 1px);
+      left: calc(var(--px) * 1px);
+    }
+    @keyframes puffOut {
+      0%   { transform: scale(0.3); opacity: 0.9; }
+      100% { transform: scale(2.5); opacity: 0; }
+    }
+
+    /* HUD label */
+    .hud {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #ff6a00;
+      font-size: 1.4rem;
+      font-weight: bold;
+      letter-spacing: 0.1em;
+      text-shadow: 0 0 10px #ff6a00;
+      animation: blink 1s step-start infinite;
+      white-space: nowrap;
+    }
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HUD -->
+  <div class="hud">!! FLIGHT CONTROL LOST !!</div>
+
+  <!-- Starfield -->
+  <div class="stars" id="stars"></div>
+
+  <!-- Smoke puffs -->
+  <div class="smoke-container" id="smoke"></div>
+
+  <!-- The rocket -->
+  <div class="rocket-wrapper" id="rocket">
+    <svg class="rocket-svg" viewBox="0 0 100 180" xmlns="http://www.w3.org/2000/svg">
+      <!-- Body -->
+      <ellipse cx="50" cy="80" rx="22" ry="55" fill="#e0e0e0" stroke="#aaa" stroke-width="1.5"/>
+
+      <!-- Nose cone -->
+      <path d="M50,5 C35,25 28,50 28,70 L72,70 C72,50 65,25 50,5Z"
+            fill="#cc2200" stroke="#991100" stroke-width="1.5"/>
+
+      <!-- Window -->
+      <circle cx="50" cy="72" r="14" fill="#1a1a2e" stroke="#888" stroke-width="2"/>
+      <!-- Smiley face in window -->
+      <circle cx="50" cy="72" r="13" fill="#ffe566"/>
+      <!-- Eyes -->
+      <circle cx="44" cy="68" r="2.2" fill="#222"/>
+      <circle cx="56" cy="68" r="2.2" fill="#222"/>
+      <!-- Smile -->
+      <path d="M43,75 Q50,82 57,75" stroke="#222" stroke-width="2.2" fill="none"
+            stroke-linecap="round"/>
+      <!-- Rosy cheeks -->
+      <circle cx="41" cy="74" r="3" fill="#ff9999" opacity="0.5"/>
+      <circle cx="59" cy="74" r="3" fill="#ff9999" opacity="0.5"/>
+
+      <!-- Left fin -->
+      <path d="M28,105 L10,135 L28,125 Z"
+            fill="#cc2200" stroke="#991100" stroke-width="1"/>
+      <!-- Right fin -->
+      <path d="M72,105 L90,135 L72,125 Z"
+            fill="#cc2200" stroke="#991100" stroke-width="1"/>
+
+      <!-- Bottom nozzle -->
+      <rect x="38" y="128" width="24" height="12" rx="3"
+            fill="#888" stroke="#666" stroke-width="1"/>
+
+      <!-- Flame group -->
+      <g class="flame">
+        <!-- Outer flame -->
+        <ellipse cx="50" cy="155" rx="14" ry="22"
+                 fill="url(#flameGrad1)" opacity="0.9"/>
+        <!-- Inner flame -->
+        <ellipse cx="50" cy="150" rx="7" ry="14"
+                 fill="url(#flameGrad2)" opacity="1"/>
+        <!-- Core -->
+        <ellipse cx="50" cy="145" rx="3" ry="7"
+                 fill="white" opacity="0.95"/>
+      </g>
+
+      <defs>
+        <radialGradient id="flameGrad1" cx="50%" cy="0%" r="100%">
+          <stop offset="0%"   stop-color="#ff6a00" stop-opacity="1"/>
+          <stop offset="60%"  stop-color="#ff3300" stop-opacity="0.8"/>
+          <stop offset="100%" stop-color="#ff000000" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="flameGrad2" cx="50%" cy="0%" r="100%">
+          <stop offset="0%"   stop-color="#ffee00"/>
+          <stop offset="100%" stop-color="#ff6a00" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+    </svg>
+  </div>
+
+  <script>
+    // Generate starfield
+    const starsEl = document.getElementById('stars');
+    for (let i = 0; i < 180; i++) {
+      const s = document.createElement('div');
+      s.className = 'star';
+      const size = Math.random() * 2.5 + 0.5;
+      s.style.cssText = `
+        width:${size}px; height:${size}px;
+        top:${Math.random()*100}%;
+        left:${Math.random()*100}%;
+        --d:${(Math.random()*2+1).toFixed(2)}s;
+        animation-delay:${(Math.random()*3).toFixed(2)}s;
+      `;
+      starsEl.appendChild(s);
+    }
+
+    // Generate smoke puffs periodically
+    const smokeEl = document.getElementById('smoke');
+    let puffCount = 0;
+    function spawnPuff() {
+      const p = document.createElement('div');
+      p.className = 'puff';
+      const size = (Math.random() * 30 + 15) + 'px';
+      p.style.setProperty('--ps', size);
+      p.style.setProperty('--px', (Math.random() * 60 - 30).toFixed(0));
+      p.style.setProperty('--py', (Math.random() * 60 - 30).toFixed(0));
+      p.style.setProperty('--pd', (Math.random() * 0.8 + 0.5).toFixed(2) + 's');
+      smokeEl.appendChild(p);
+      setTimeout(() => p.remove(), 1400);
+      puffCount++;
+      if (puffCount > 40) {
+        // clean up old ones
+        while (smokeEl.children.length > 20) smokeEl.removeChild(smokeEl.firstChild);
+      }
+    }
+    setInterval(spawnPuff, 80);
+  </script>
+</body>
+</html>
